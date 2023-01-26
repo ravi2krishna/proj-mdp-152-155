@@ -23,12 +23,6 @@
 <input type="radio" name="r1" value="sub" />difference
 <br />
 </label>
-       
-<label>
-<input type="radio" name="r1" value="sub" />product
-<br />
-</label>       
-       
 </div>
 <input type="submit" value="submit" />
 </form>
