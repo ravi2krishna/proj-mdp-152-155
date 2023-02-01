@@ -1,5 +1,5 @@
 # Base Image
-FROM maven:3.5.4-jdk-8-apline AS builder
+FROM maven:3.8.7-eclipse-temurin-11 AS builder
 
 # Setup Project Dir
 RUN mkdir /webcal
