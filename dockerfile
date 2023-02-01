@@ -1,5 +1,5 @@
 # Base Image
-FROM maven:3.8.7-eclipse-temurin-11 AS builder
+FROM maven:3.5.4-jdk-8-apline AS builder
 
 # Setup Project Dir
 RUN mkdir /webcal
@@ -11,6 +11,7 @@ WORKDIR /webcal
 COPY . /webcal
 
 # Perform Build
+RUN mvn dependency:go-offline -B
 RUN mvn package
 
 # For Deployment
