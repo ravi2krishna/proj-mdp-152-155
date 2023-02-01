@@ -1,8 +1,5 @@
 pipeline{
     agent any
-    options {
-         buidDiscarder(logrotator(numToKeepStr: '5'))
-    }
     environment { 
 	DOCKERHUB_CREDENTIALS=credentials('docker-hub-kavitha')
     }
