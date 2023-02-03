@@ -3,7 +3,7 @@ pipeline {
     stages {
         stage('Build docker image') {
             steps {
-                sh 'docker build -t Hari63106/java-app:latest .'
+                sh 'docker build -t hari63106/java-app:latest .'
             }   
         }
         stage('Remove existing container') {
@@ -13,7 +13,7 @@ pipeline {
         }
         stage('Run container') {
             steps {
-                sh 'docker container run -dt --name app -P Hari63106/java-app'
+                sh 'docker container run -dt --name app -P hari63106/java-app'
             }
         }
         stage('login') {
@@ -23,7 +23,7 @@ pipeline {
         }
         stage('Push') {
             steps {
-                sh 'docker push Hari63106/java-app:latest'
+                sh 'docker push hari63106/java-app:latest'
             }
         }
     }
