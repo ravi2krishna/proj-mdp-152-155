@@ -1,5 +1,11 @@
 pipeline {
     agent any
+    options {
+        buildDiscarder(logRotator(numToKeepStr: '5'))
+    }
+    environment {
+        DOCKERHUB_CREDENTIALS = credentials('hari63106-dockerhub')
+    }
     stages {
         stage('Build docker image') {
             steps {
