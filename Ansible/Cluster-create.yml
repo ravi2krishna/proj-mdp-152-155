@@ -1,0 +1,71 @@
+- name: Create Kubernetes cluster
+  hosts: k8ws_workstation
+  become: yes
+  vars:
+    cluster_name: "mycluster.k8ws.local"
+    state_store: "k8ws-kops-everything-state-chsufg1"
+    zones: "us-east-2a,us-east-2b"
+    node_count: 2
+    node_size: "t2.medium"
+    master_size: "t2.medium"
+  tasks:
+    - name: Debug — Check if kops binary exists in /usr/local/bin
+      shell: ls -l /usr/local/bin/kops
+      register: kops_check
+      ignore_errors: true
+    - name: Show result of kops binary check
+      debug:
+        var: kops_check.stdout_lines
+    - name: Create the Kubernetes cluster using kops
+      shell: |
+        /usr/local/bin/kops create cluster \
+          --name {{ cluster_name }} \
+          --state s3://{{ state_store }} \
+          --zones {{ zones }} \
+          --node-count {{ node_count }} \
+          --node-size {{ node_size }} \
+          --control-plane-size {{ master_size }}
+      register: kops_create_cluster
+      args:
+        executable: /bin/bash
+      failed_when: "'already exists' not in kops_create_cluster.stderr and kops_create_cluster.rc != 0"
+      changed_when: "'already exists' not in kops_create_cluster.stderr"
+    - name: Apply the cluster configuration with kops update
+      shell: |
+        /usr/local/bin/kops update cluster \
+          --name {{ cluster_name }} \
+          --state s3://{{ state_store }} \
+          --yes
+      args:
+        executable: /bin/bash
+    - name: Wait for resources to stabilize
+      pause:
+        minutes: 2
+    - name: Validate the Kubernetes cluster
+      shell: |
+        /usr/local/bin/kops validate cluster \
+          --name {{ cluster_name }} \
+          --state s3://{{ state_store }}
+      register: kops_validate_cluster
+      retries: 5
+      delay: 60
+      until: kops_validate_cluster.rc == 0
+      args:
+        executable: /bin/bash
+    - name: Show validation output
+      debug:
+        var: kops_validate_cluster.stdout_lines
+
+        var: kops_create_cluster.stdout
+      when: kops_create_cluster is defined and kops_create_cluster.stdout is not none
+      register: kops_create_cluster_output
+    - name: Output the result of the cluster validation
+      debug:
+        var: kops_validate_cluster.stdout
+      when: kops_validate_cluster is defined and kops_validate_cluster.stdout is not none
+      register: kops_validate_cluster_output
+    - name: Output the result of the cluster creation
+      debug:
+        var: kops_create_cluster.stdout
+      when: kops_create_cluster is defined and kops_create_cluster.stdout is not none
+      register: kops_create_cluster_output

@@ -1,0 +1,23 @@
+---
+- name: Delete Kubernetes cluster using Kops
+  hosts: k8ws_workstation
+  become: yes
+  vars:
+    cluster_name: "mycluster.k8ws.local"
+    state_store: "k8s-kops-everything-state-chsufg1"
+  tasks:
+    - name: Ensure Kops is installed
+      command: which kops
+      register: kops_path
+      failed_when: kops_path.rc != 0
+      changed_when: false
+    - name: Delete cluster with Kops
+      command: >
+        /usr/local/bin/kops delete cluster
+        --name {{ cluster_name }}
+        --state s3://{{ state_store }}
+        --yes
+      register: kops_delete_cluster
+    - name: Show cluster deletion output
+      debug:
+        var: kops_delete_cluster.stdout

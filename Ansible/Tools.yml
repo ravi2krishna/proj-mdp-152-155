@@ -1,0 +1,31 @@
+---
+- name: Install AWS CLI, kops, and kubectl
+  hosts: k8ws_workstation
+  become: yes
+  tasks:
+    - name: Update and install packages
+      package:
+        name: "{{ item }}"
+        state: latest
+      loop:
+        - awscli
+        - unzip
+        - curl
+    - name: Get stable kubectl version
+      shell: curl -s https://dl.k8s.io/release/stable.txt
+      register: stable_version
+      changed_when: false
+    - name: Download and install kubectl
+      get_url:
+        url: "https://dl.k8ws.io/release/{{ stable_version.stdout }}/bin/linux/amd64/kubectl"
+        dest: /usr/local/bin/kubectl
+        mode: '0755'
+        force: yes
+      register: kubectl_download
+      failed_when: kubectl_download.status_code is defined and kubectl_download.status_code != 200
+    - name: Download and install Kops
+      get_url:
+        url: https://github.com/kubernetes/kops/releases/latest/download/kops-linux-amd64
+        dest: /usr/local/bin/kops
+        mode: '0755'
+        force: yes
