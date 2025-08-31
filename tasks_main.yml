@@ -1,0 +1,46 @@
+---
+- name: Check if the cluster already exists
+  command: kops get cluster --name={{ cluster_name }} --state={{ kops_state_store }}
+  register: cluster_exists
+  ignore_errors: true
+
+- name: Create cluster
+  command: |
+    kops create cluster \
+      --name={{ cluster_name }} \
+      --state=s3://{{ s3_bucket_name }} \
+      --zones={{ zones }} \
+      --control-plane-zones={{ zones }} \
+      --node-count={{ node_count }} \
+      --node-size={{ node_instance_type }} \
+      --control-plane-count={{ master_count }} \
+      --control-plane-size={{ master_instance_type }} \
+      --ssh-public-key=~/.ssh/kops-rsa.pub \
+      --cloud-labels="Environment=Prod" \
+      --associate-public-ip=false \
+      --topology=private \
+      --networking=calico \
+      --authorization=RBAC \
+      --yes
+  when: cluster_exists.rc != 0
+  environment:
+    AWS_REGION: "{{ aws_region }}"
+
+- name: Update cluster configuration
+  command: |
+    kops update cluster \
+      --name={{ cluster_name }} \
+      --state=s3://{{ s3_bucket_name }} \
+      --yes
+  when: cluster_exists.rc == 0
+  environment:
+    AWS_REGION: "{{ aws_region }}"
+
+- name: Validate cluster
+  command: |
+    kops validate cluster \
+      --name={{ cluster_name }} \
+      --state=s3://{{ s3_bucket_name }} \
+      --wait 10m
+  environment:
+    AWS_REGION: "{{ aws_region }}"

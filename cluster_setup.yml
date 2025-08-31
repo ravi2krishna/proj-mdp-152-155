@@ -1,0 +1,14 @@
+---
+- name: Install dependencies
+  hosts: localhost
+  become: yes
+  gather_facts: yes
+  roles:
+    - install_deps
+
+- name: Create Kubernetes cluster
+  hosts: localhost
+  become: yes
+  gather_facts: yes
+  roles:
+    - create_cluster

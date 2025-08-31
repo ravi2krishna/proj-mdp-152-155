@@ -1,0 +1,28 @@
+# defaults file for create_cluster
+# roles/create_cluster/defaults/main.yml
+---
+# Required variables
+kops_state_store: "s3://kopscluster-state-bucket"
+cluster_name: "prod-cluster.k8s.local"
+network_id: "vpc-0c67f9d91b79d8128"
+ssh_public_key_path: "~/.ssh/kops-rsa.pub"
+
+# Cluster configuration
+zones: "us-east-1a,us-east-1b,us-east-1c"
+control_plane_zones: "us-east-1a,us-east-1b,us-east-1c"
+node_count: 3
+node_size: "t3.medium"
+control_plane_count: 3
+control_plane_size: "t3.medium"
+
+# Network configuration
+associate_public_ip: false
+topology: "private"
+networking: "calico"
+
+# Tags and labels
+cloud_labels: "Environment=Prod"
+
+# Security/Authorization
+authorization: "RBAC"
+
